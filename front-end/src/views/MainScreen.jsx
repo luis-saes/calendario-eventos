@@ -20,13 +20,24 @@ const MainScreen = () => {
   const [endTime, setEndTime] = useState();
   const handleChangeEndTime = ({ target: { value } }) => setEndTime(value);
 
-  const onSelectSlot = useCallback((slotInfo) => {
-    console.log(slotInfo.start);
-    // setDay(slotInfo.start.getDay());
-    // setStartTime(slotInfo.start.getHours());
-    // setEndTime(slotInfo.end.getHours());
+  const padTo2Digits = (num) => {
+    return String(num).padStart(2, "0");
+  };
+
+  const onSelectSlot = (slotInfo) => {
     handleShowModal();
-  }, []);
+    setDay(slotInfo.start.toISOString().split("T")[0]);
+    setStartTime(
+      `${padTo2Digits(slotInfo.start.getHours())}:${padTo2Digits(
+        slotInfo.start.getMinutes()
+      )}`
+    );
+    setEndTime(
+      `${padTo2Digits(slotInfo.end.getHours())}:${padTo2Digits(
+        slotInfo.end.getMinutes()
+      )}`
+    );
+  };
 
   const [myEventsList, setMyEventsList] = useState([
     {
@@ -46,6 +57,7 @@ const MainScreen = () => {
       end: new Date(`${day}T${endTime}`),
     };
     setMyEventsList([...myEventsList, eventObject]);
+    console.log(eventObject);
     setShowModal(false);
   };
 
@@ -106,7 +118,7 @@ const MainScreen = () => {
           localizer={localizer}
           events={myEventsList}
           selectable
-          onSelectSlot={onSelectSlot}
+          onSelectSlot={(slotInfo) => onSelectSlot(slotInfo)}
           startAccessor="start"
           endAcessor="end"
         />
