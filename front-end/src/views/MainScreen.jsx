@@ -20,6 +20,8 @@ const MainScreen = () => {
   const handleChangeStartTime = ({ target: { value } }) => setStartTime(value);
   const [endTime, setEndTime] = useState();
   const handleChangeEndTime = ({ target: { value } }) => setEndTime(value);
+  const [editingOrCreating, setEditingOrCreating] = useState();
+  const [editingId, setEditingId] = useState();
 
   const [modalTitle, setModalTitle] = useState("Adicionar Novo Evento");
 
@@ -41,6 +43,7 @@ const MainScreen = () => {
       )}`
     );
     setModalTitle("Editar Evento");
+    setEditingId(currentElement.id);
   };
 
   const removeData = (id) => {
@@ -52,6 +55,7 @@ const MainScreen = () => {
   };
 
   const onSelectSlot = (slotInfo) => {
+    setEditingOrCreating("creating");
     setModalTitle("Adicionar Novo Evento");
     setDescription("");
     setDay(slotInfo.start.toISOString().split("T")[0]);
@@ -69,6 +73,7 @@ const MainScreen = () => {
   };
 
   const onSelectEvent = (eventInfo) => {
+    setEditingOrCreating("editing");
     setData(eventInfo);
     handleShowModal();
   };
@@ -87,13 +92,23 @@ const MainScreen = () => {
   const handleShowModal = () => setShowModal(true);
   const handleConfirmModal = () => {
     const eventObject = {
-      id: uuidv4(),
       title: description,
       start: new Date(`${day}T${startTime}`),
       end: new Date(`${day}T${endTime}`),
     };
-    setMyEventsList([...myEventsList, eventObject]);
-    setShowModal(false);
+    if (editingOrCreating === "creating") {
+      eventObject.id = uuidv4();
+      setMyEventsList([...myEventsList, eventObject]);
+      setShowModal(false);
+    } else if (editingOrCreating === "editing") {
+      const currentEvent = myEventsList.filter((el) => el.id === editingId)[0];
+      eventObject.id = currentEvent.id;
+      setMyEventsList([
+        ...myEventsList.filter((el) => el.id !== editingId),
+        eventObject,
+      ]);
+      setShowModal(false);
+    }
   };
 
   return (
