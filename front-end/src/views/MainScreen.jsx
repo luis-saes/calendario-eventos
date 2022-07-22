@@ -3,11 +3,13 @@ import { Calendar, momentLocalizer } from "react-big-calendar";
 import { v4 as uuidv4 } from "uuid";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
+import "moment/locale/pt-br";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import styles from "./MainScreen.module.css";
 
+moment.locale("pt-br");
 const localizer = momentLocalizer(moment);
 
 const MainScreen = () => {
@@ -182,6 +184,26 @@ const MainScreen = () => {
           onSelectEvent={(eventInfo) => onSelectEvent(eventInfo)}
           startAccessor="start"
           endAcessor="end"
+          messages={{
+            date: "Data",
+            time: "Tempo",
+            event: "Evento",
+            allDay: "Dia Todo",
+            week: "Semana",
+            work_week: "Semana de Trabalho",
+            day: "Dia",
+            month: "Mês",
+            previous: "Anterior",
+            next: "Próximo",
+            yesterday: "Ontem",
+            tomorrow: "Amanhã",
+            today: "Hoje",
+            agenda: "Agenda",
+
+            noEventsInRange: "Não há eventos neste intervalo.",
+
+            showMore: (total) => `+${total} mais`,
+          }}
         />
       </div>
     </div>
