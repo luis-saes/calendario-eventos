@@ -1,5 +1,6 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
+import { v4 as uuidv4 } from "uuid";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
 import Button from "react-bootstrap/Button";
@@ -20,16 +21,61 @@ const MainScreen = () => {
   const [endTime, setEndTime] = useState();
   const handleChangeEndTime = ({ target: { value } }) => setEndTime(value);
 
-  const onSelectSlot = useCallback((slotInfo) => {
-    console.log(slotInfo.start);
-    // setDay(slotInfo.start.getDay());
-    // setStartTime(slotInfo.start.getHours());
-    // setEndTime(slotInfo.end.getHours());
+  const [modalTitle, setModalTitle] = useState("Adicionar Novo Evento");
+
+  const setData = (eventInfo) => {
+    const currentElement = myEventsList.filter(
+      (el) => el.id === eventInfo.id
+    )[0];
+    console.log(currentElement);
+    setDescription(currentElement.title);
+    setDay(currentElement.start.toISOString().split("T")[0]);
+    setStartTime(
+      `${padTo2Digits(currentElement.start.getHours())}:${padTo2Digits(
+        currentElement.start.getMinutes()
+      )}`
+    );
+    setEndTime(
+      `${padTo2Digits(currentElement.end.getHours())}:${padTo2Digits(
+        currentElement.end.getMinutes()
+      )}`
+    );
+    setModalTitle("Editar Evento");
+  };
+
+  const removeData = (id) => {
+    setMyEventsList(myEventsList.filter((el) => el.id !== id));
+  };
+
+  const padTo2Digits = (num) => {
+    return String(num).padStart(2, "0");
+  };
+
+  const onSelectSlot = (slotInfo) => {
+    setModalTitle("Adicionar Novo Evento");
+    setDescription("");
+    setDay(slotInfo.start.toISOString().split("T")[0]);
+    setStartTime(
+      `${padTo2Digits(slotInfo.start.getHours())}:${padTo2Digits(
+        slotInfo.start.getMinutes()
+      )}`
+    );
+    setEndTime(
+      `${padTo2Digits(slotInfo.end.getHours())}:${padTo2Digits(
+        slotInfo.end.getMinutes()
+      )}`
+    );
     handleShowModal();
-  }, []);
+  };
+
+  const onSelectEvent = (eventInfo) => {
+    setData(eventInfo);
+    handleShowModal();
+  };
 
   const [myEventsList, setMyEventsList] = useState([
     {
+      id: uuidv4(),
       title: "Reunião na TokenLab",
       start: new Date("2022-07-22T11:30:00"),
       end: new Date("2022-07-22T12:30:00"),
@@ -41,6 +87,7 @@ const MainScreen = () => {
   const handleShowModal = () => setShowModal(true);
   const handleConfirmModal = () => {
     const eventObject = {
+      id: uuidv4(),
       title: description,
       start: new Date(`${day}T${startTime}`),
       end: new Date(`${day}T${endTime}`),
@@ -53,7 +100,7 @@ const MainScreen = () => {
     <div className={styles.screenBackground}>
       <Modal show={showModal} onHide={handleCloseModal} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Adicionar Novo Evento</Modal.Title>
+          <Modal.Title>{modalTitle}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -106,7 +153,8 @@ const MainScreen = () => {
           localizer={localizer}
           events={myEventsList}
           selectable
-          onSelectSlot={onSelectSlot}
+          onSelectSlot={(slotInfo) => onSelectSlot(slotInfo)}
+          onSelectEvent={(eventInfo) => onSelectEvent(eventInfo)}
           startAccessor="start"
           endAcessor="end"
         />
