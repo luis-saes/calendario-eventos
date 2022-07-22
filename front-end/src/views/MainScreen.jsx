@@ -11,6 +11,7 @@ import styles from "./MainScreen.module.css";
 const localizer = momentLocalizer(moment);
 
 const MainScreen = () => {
+  const [currentId, setCurrentId] = useState();
   const [description, setDescription] = useState("");
   const handleChangeDescription = ({ target: { value } }) =>
     setDescription(value);
@@ -30,6 +31,7 @@ const MainScreen = () => {
       (el) => el.id === eventInfo.id
     )[0];
     console.log(currentElement);
+    setCurrentId(currentElement.id);
     setDescription(currentElement.title);
     setDay(currentElement.start.toISOString().split("T")[0]);
     setStartTime(
@@ -46,8 +48,9 @@ const MainScreen = () => {
     setEditingId(currentElement.id);
   };
 
-  const removeData = (id) => {
-    setMyEventsList(myEventsList.filter((el) => el.id !== id));
+  const handleDeleteEvent = () => {
+    setMyEventsList(myEventsList.filter((el) => el.id !== currentId));
+    handleCloseModal();
   };
 
   const padTo2Digits = (num) => {
@@ -111,6 +114,12 @@ const MainScreen = () => {
     }
   };
 
+  const removeButton = (
+    <Button variant="danger" onClick={handleDeleteEvent}>
+      Deletar Evento
+    </Button>
+  );
+
   return (
     <div className={styles.screenBackground}>
       <Modal show={showModal} onHide={handleCloseModal} centered>
@@ -155,6 +164,7 @@ const MainScreen = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
+          {editingOrCreating === "editing" && removeButton}
           <Button variant="secondary" onClick={handleCloseModal}>
             Cancelar
           </Button>
