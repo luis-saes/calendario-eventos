@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
 import "moment/locale/pt-br";
@@ -26,13 +27,69 @@ const MainScreen = () => {
   const [editingOrCreating, setEditingOrCreating] = useState();
   const [editingId, setEditingId] = useState();
 
+  const renameKey = (object, oldKey, newKey) => {
+    object[newKey] = object[oldKey];
+    delete object[oldKey];
+  };
+
+  const convertToTime = (object, key) => {
+    object[key] = new Date(Date.parse(object[key]));
+  };
+
+  useEffect(() => {
+    axios.get("http://localhost:3001/calendar").then((res) => {
+      const resJson = res.data;
+      resJson.forEach((object) => renameKey(object, "_id", "id"));
+      resJson.forEach((object) => renameKey(object, "descricao", "title"));
+      resJson.forEach((object) => renameKey(object, "data_inicio", "start"));
+      resJson.forEach((object) => renameKey(object, "data_fim", "end"));
+
+      resJson.forEach((object) => convertToTime(object, "start"));
+      resJson.forEach((object) => convertToTime(object, "end"));
+
+      setMyEventsList(resJson);
+    });
+  }, []);
+
+  const postEvent = async (object) => {
+    try {
+      await axios.post("http://localhost:3001/calendar", {
+        descricao: object.title,
+        data_inicio: object.start,
+        data_fim: object.end,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const putEvent = async (object) => {
+    try {
+      await axios.put(`http://localhost:3001/calendar/${object.id}`, {
+        descricao: object.title,
+        data_inicio: object.start,
+        data_fim: object.end,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const deleteEvent = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3001/calendar/${id}`);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const [modalTitle, setModalTitle] = useState("Adicionar Novo Evento");
 
   const setData = (eventInfo) => {
     const currentElement = myEventsList.filter(
       (el) => el.id === eventInfo.id
     )[0];
-    console.log(currentElement);
+
     setCurrentId(currentElement.id);
     setDescription(currentElement.title);
     setDay(currentElement.start.toISOString().split("T")[0]);
@@ -53,6 +110,7 @@ const MainScreen = () => {
   const handleDeleteEvent = () => {
     setMyEventsList(myEventsList.filter((el) => el.id !== currentId));
     handleCloseModal();
+    deleteEvent(currentId);
   };
 
   const padTo2Digits = (num) => {
@@ -102,9 +160,8 @@ const MainScreen = () => {
       end: new Date(`${day}T${endTime}`),
     };
     if (editingOrCreating === "creating") {
-      eventObject.id = uuidv4();
       setMyEventsList([...myEventsList, eventObject]);
-      setShowModal(false);
+      postEvent(eventObject);
     } else if (editingOrCreating === "editing") {
       const currentEvent = myEventsList.filter((el) => el.id === editingId)[0];
       eventObject.id = currentEvent.id;
@@ -112,8 +169,9 @@ const MainScreen = () => {
         ...myEventsList.filter((el) => el.id !== editingId),
         eventObject,
       ]);
-      setShowModal(false);
+      putEvent(eventObject);
     }
+    handleCloseModal();
   };
 
   const removeButton = (
