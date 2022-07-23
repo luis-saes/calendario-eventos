@@ -63,6 +63,18 @@ const MainScreen = () => {
     }
   };
 
+  const putEvent = async (object) => {
+    try {
+      await axios.put(`http://localhost:3001/calendar/${object.id}`, {
+        descricao: object.title,
+        data_inicio: object.start,
+        data_fim: object.end,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const [modalTitle, setModalTitle] = useState("Adicionar Novo Evento");
 
   const setData = (eventInfo) => {
@@ -139,7 +151,6 @@ const MainScreen = () => {
       end: new Date(`${day}T${endTime}`),
     };
     if (editingOrCreating === "creating") {
-      eventObject.id = uuidv4();
       setMyEventsList([...myEventsList, eventObject]);
       setShowModal(false);
       postEvent(eventObject);
@@ -151,6 +162,7 @@ const MainScreen = () => {
         eventObject,
       ]);
       setShowModal(false);
+      putEvent(eventObject);
     }
   };
 
