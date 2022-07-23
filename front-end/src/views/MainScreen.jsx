@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
-import { v4 as uuidv4 } from "uuid";
 import axios from "axios";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
@@ -141,14 +140,7 @@ const MainScreen = () => {
     handleShowModal();
   };
 
-  const [myEventsList, setMyEventsList] = useState([
-    {
-      id: uuidv4(),
-      title: "Reunião na TokenLab",
-      start: new Date("2022-07-22T11:30:00"),
-      end: new Date("2022-07-22T12:30:00"),
-    },
-  ]);
+  const [myEventsList, setMyEventsList] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
   const handleCloseModal = () => setShowModal(false);
