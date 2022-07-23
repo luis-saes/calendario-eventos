@@ -1,11 +1,12 @@
 import React from "react";
-import Modal from "../components/Login/Modal";
+import ModalLogin from "../components/Login/ModalLogin";
+import ModalRegister from "../components/Login/ModalRegister";
 import styles from "./LoginScreen.module.css";
 
 const LoginScreen = () => {
   return (
     <div className={styles.screenBackground}>
-      <Modal />
+      <ModalRegister />
     </div>
   );
 };

@@ -27,3 +27,15 @@
 .button:hover {
   background-color: #5f3ac6;
 }
+
+.mLink {
+  color: blue;
+  background-color: transparent;
+  text-decoration: none;
+}
+
+.mLink:focus,
+.mLink:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
