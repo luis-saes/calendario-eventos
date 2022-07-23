@@ -3,14 +3,17 @@ import { Calendar, momentLocalizer } from "react-big-calendar";
 import { v4 as uuidv4 } from "uuid";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
+import "moment/locale/pt-br";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import Form from "react-bootstrap/Form";
 import styles from "./MainScreen.module.css";
 
+moment.locale("pt-br");
 const localizer = momentLocalizer(moment);
 
 const MainScreen = () => {
+  const [currentId, setCurrentId] = useState();
   const [description, setDescription] = useState("");
   const handleChangeDescription = ({ target: { value } }) =>
     setDescription(value);
@@ -20,6 +23,8 @@ const MainScreen = () => {
   const handleChangeStartTime = ({ target: { value } }) => setStartTime(value);
   const [endTime, setEndTime] = useState();
   const handleChangeEndTime = ({ target: { value } }) => setEndTime(value);
+  const [editingOrCreating, setEditingOrCreating] = useState();
+  const [editingId, setEditingId] = useState();
 
   const [modalTitle, setModalTitle] = useState("Adicionar Novo Evento");
 
@@ -28,6 +33,7 @@ const MainScreen = () => {
       (el) => el.id === eventInfo.id
     )[0];
     console.log(currentElement);
+    setCurrentId(currentElement.id);
     setDescription(currentElement.title);
     setDay(currentElement.start.toISOString().split("T")[0]);
     setStartTime(
@@ -41,10 +47,12 @@ const MainScreen = () => {
       )}`
     );
     setModalTitle("Editar Evento");
+    setEditingId(currentElement.id);
   };
 
-  const removeData = (id) => {
-    setMyEventsList(myEventsList.filter((el) => el.id !== id));
+  const handleDeleteEvent = () => {
+    setMyEventsList(myEventsList.filter((el) => el.id !== currentId));
+    handleCloseModal();
   };
 
   const padTo2Digits = (num) => {
@@ -52,6 +60,7 @@ const MainScreen = () => {
   };
 
   const onSelectSlot = (slotInfo) => {
+    setEditingOrCreating("creating");
     setModalTitle("Adicionar Novo Evento");
     setDescription("");
     setDay(slotInfo.start.toISOString().split("T")[0]);
@@ -69,6 +78,7 @@ const MainScreen = () => {
   };
 
   const onSelectEvent = (eventInfo) => {
+    setEditingOrCreating("editing");
     setData(eventInfo);
     handleShowModal();
   };
@@ -87,14 +97,30 @@ const MainScreen = () => {
   const handleShowModal = () => setShowModal(true);
   const handleConfirmModal = () => {
     const eventObject = {
-      id: uuidv4(),
       title: description,
       start: new Date(`${day}T${startTime}`),
       end: new Date(`${day}T${endTime}`),
     };
-    setMyEventsList([...myEventsList, eventObject]);
-    setShowModal(false);
+    if (editingOrCreating === "creating") {
+      eventObject.id = uuidv4();
+      setMyEventsList([...myEventsList, eventObject]);
+      setShowModal(false);
+    } else if (editingOrCreating === "editing") {
+      const currentEvent = myEventsList.filter((el) => el.id === editingId)[0];
+      eventObject.id = currentEvent.id;
+      setMyEventsList([
+        ...myEventsList.filter((el) => el.id !== editingId),
+        eventObject,
+      ]);
+      setShowModal(false);
+    }
   };
+
+  const removeButton = (
+    <Button variant="danger" onClick={handleDeleteEvent}>
+      Deletar Evento
+    </Button>
+  );
 
   return (
     <div className={styles.screenBackground}>
@@ -140,6 +166,7 @@ const MainScreen = () => {
           </Form>
         </Modal.Body>
         <Modal.Footer>
+          {editingOrCreating === "editing" && removeButton}
           <Button variant="secondary" onClick={handleCloseModal}>
             Cancelar
           </Button>
@@ -157,6 +184,26 @@ const MainScreen = () => {
           onSelectEvent={(eventInfo) => onSelectEvent(eventInfo)}
           startAccessor="start"
           endAcessor="end"
+          messages={{
+            date: "Data",
+            time: "Tempo",
+            event: "Evento",
+            allDay: "Dia Todo",
+            week: "Semana",
+            work_week: "Semana de Trabalho",
+            day: "Dia",
+            month: "Mês",
+            previous: "Anterior",
+            next: "Próximo",
+            yesterday: "Ontem",
+            tomorrow: "Amanhã",
+            today: "Hoje",
+            agenda: "Agenda",
+
+            noEventsInRange: "Não há eventos neste intervalo.",
+
+            showMore: (total) => `+${total} mais`,
+          }}
         />
       </div>
     </div>
