@@ -26,7 +26,6 @@ const MainScreen = () => {
   const handleChangeEndTime = ({ target: { value } }) => setEndTime(value);
   const [editingOrCreating, setEditingOrCreating] = useState();
   const [editingId, setEditingId] = useState();
-  const [tempEvents, setTempEvents] = useState();
 
   const renameKey = (object, oldKey, newKey) => {
     object[newKey] = object[oldKey];
@@ -51,6 +50,18 @@ const MainScreen = () => {
       setMyEventsList(resJson);
     });
   }, []);
+
+  const postEvent = async (object) => {
+    try {
+      await axios.post("http://localhost:3001/calendar", {
+        descricao: object.title,
+        data_inicio: object.start,
+        data_fim: object.end,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const [modalTitle, setModalTitle] = useState("Adicionar Novo Evento");
 
@@ -131,6 +142,7 @@ const MainScreen = () => {
       eventObject.id = uuidv4();
       setMyEventsList([...myEventsList, eventObject]);
       setShowModal(false);
+      postEvent(eventObject);
     } else if (editingOrCreating === "editing") {
       const currentEvent = myEventsList.filter((el) => el.id === editingId)[0];
       eventObject.id = currentEvent.id;
