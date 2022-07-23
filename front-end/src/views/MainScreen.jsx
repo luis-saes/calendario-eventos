@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import { v4 as uuidv4 } from "uuid";
+import axios from "axios";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import moment from "moment";
 import "moment/locale/pt-br";
@@ -25,6 +26,31 @@ const MainScreen = () => {
   const handleChangeEndTime = ({ target: { value } }) => setEndTime(value);
   const [editingOrCreating, setEditingOrCreating] = useState();
   const [editingId, setEditingId] = useState();
+  const [tempEvents, setTempEvents] = useState();
+
+  const renameKey = (object, oldKey, newKey) => {
+    object[newKey] = object[oldKey];
+    delete object[oldKey];
+  };
+
+  const convertToTime = (object, key) => {
+    object[key] = new Date(Date.parse(object[key]));
+  };
+
+  useEffect(() => {
+    axios.get("http://localhost:3001/calendar").then((res) => {
+      const resJson = res.data;
+      resJson.forEach((object) => renameKey(object, "_id", "id"));
+      resJson.forEach((object) => renameKey(object, "descricao", "title"));
+      resJson.forEach((object) => renameKey(object, "data_inicio", "start"));
+      resJson.forEach((object) => renameKey(object, "data_fim", "end"));
+
+      resJson.forEach((object) => convertToTime(object, "start"));
+      resJson.forEach((object) => convertToTime(object, "end"));
+
+      setMyEventsList(resJson);
+    });
+  }, []);
 
   const [modalTitle, setModalTitle] = useState("Adicionar Novo Evento");
 
@@ -32,7 +58,7 @@ const MainScreen = () => {
     const currentElement = myEventsList.filter(
       (el) => el.id === eventInfo.id
     )[0];
-    console.log(currentElement);
+
     setCurrentId(currentElement.id);
     setDescription(currentElement.title);
     setDay(currentElement.start.toISOString().split("T")[0]);
