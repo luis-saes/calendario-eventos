@@ -75,6 +75,14 @@ const MainScreen = () => {
     }
   };
 
+  const deleteEvent = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3001/calendar/${id}`);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const [modalTitle, setModalTitle] = useState("Adicionar Novo Evento");
 
   const setData = (eventInfo) => {
@@ -102,6 +110,7 @@ const MainScreen = () => {
   const handleDeleteEvent = () => {
     setMyEventsList(myEventsList.filter((el) => el.id !== currentId));
     handleCloseModal();
+    deleteEvent(currentId);
   };
 
   const padTo2Digits = (num) => {
@@ -152,7 +161,6 @@ const MainScreen = () => {
     };
     if (editingOrCreating === "creating") {
       setMyEventsList([...myEventsList, eventObject]);
-      setShowModal(false);
       postEvent(eventObject);
     } else if (editingOrCreating === "editing") {
       const currentEvent = myEventsList.filter((el) => el.id === editingId)[0];
@@ -161,9 +169,9 @@ const MainScreen = () => {
         ...myEventsList.filter((el) => el.id !== editingId),
         eventObject,
       ]);
-      setShowModal(false);
       putEvent(eventObject);
     }
+    handleCloseModal();
   };
 
   const removeButton = (
