@@ -1,33 +1,9 @@
-const Sequelize = require("sequelize");
-const database = require("../database/database");
+const mongoose = require("mongoose");
 
-const Event = database.define("events", {
-  id: {
-    type: Sequelize.INTEGER,
-    autoIncrement: true,
-    allowNull: false,
-    primaryKey: true,
-  },
-  descricao: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  data_inicio: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  data_fim: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  horario_inicio: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
-  horario_fim: {
-    type: Sequelize.STRING,
-    allowNull: false,
-  },
+const EventsSchema = new mongoose.Schema({
+  descricao: String,
+  data_inicio: Date,
+  data_fim: Date,
 });
 
-module.exports = Event;
+module.exports = mongoose.model("events", EventsSchema);
