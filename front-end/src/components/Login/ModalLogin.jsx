@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useAuth } from "../../helpers/Auth";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
@@ -10,9 +12,11 @@ import styles from "./Modal.module.css";
 const ModalLogin = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [authenticated, setAuthenticated] = useState(false);
   const handleChangeEmail = ({ target: { value } }) => setEmail(value);
   const handleChangePassword = ({ target: { value } }) => setPassword(value);
+
+  const auth = useAuth();
+  const navigate = useNavigate();
 
   const validateEmail = (email) => {
     return String(email)
@@ -31,7 +35,9 @@ const ModalLogin = (props) => {
         },
       });
       if (res.status === 200) {
-        setAuthenticated(true);
+        console.log(1);
+        auth.login(email);
+        navigate("/calendar");
       }
     } catch (err) {
       console.log(err);
