@@ -1,9 +1,9 @@
 const Login = require("../model/loginModel");
 
 const read = async (req, res) => {
-  const { login, senha } = req.body;
+  const login = req.query.email;
+  const senha = req.query.password;
   const user = await Login.findOne({ login: login, senha: senha });
-
   if (!user) {
     return res.status(404).json({
       error: "Usuário ou senha errados",

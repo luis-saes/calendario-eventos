@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import axios from "axios";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Container from "react-bootstrap/Container";
@@ -6,18 +7,38 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import styles from "./Modal.module.css";
 
-const ModalRegister = () => {
+const ModalRegister = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const handleChangeEmail = ({ target: { value } }) => setEmail(value);
   const handleChangePassword = ({ target: { value } }) => setPassword(value);
 
-  useEffect(() => {
-    console.log(email, password);
-  }, [email, password]);
+  const validateEmail = (email) => {
+    return String(email)
+      .toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      );
+  };
 
-  const handleRegister = () => {
-    console.log("e");
+  const postUser = async () => {
+    try {
+      await axios.post("http://localhost:3001/", {
+        login: email,
+        senha: password,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleRegister = (event) => {
+    event.preventDefault();
+    if (!email || !password || password.length < 8 || !validateEmail(email)) {
+      return;
+    }
+    console.log("Foi");
+    postUser();
   };
 
   return (
@@ -43,9 +64,15 @@ const ModalRegister = () => {
                   onChange={handleChangePassword}
                 />
               </Form.Group>
+              <div
+                className={`${styles.mLink} mb-2`}
+                onClick={() => props.changeScreen("register")}
+              >
+                Já possuo conta
+              </div>
               <Button
                 className={styles.button}
-                onClick={handleRegister}
+                onClick={(event) => handleRegister(event)}
                 variant="primary"
                 type="submit"
               >
