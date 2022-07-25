@@ -10,6 +10,10 @@ import Col from "react-bootstrap/Col";
 import styles from "./Modal.module.css";
 
 const ModalLogin = (props) => {
+  const [emailValidated, setEmailValidated] = useState("");
+  const [passwordValidated, setpasswordValidated] = useState("");
+  const [loginErrorMessage, setLoginErrorMessage] = useState("");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const handleChangeEmail = ({ target: { value } }) => setEmail(value);
@@ -35,18 +39,35 @@ const ModalLogin = (props) => {
         },
       });
       if (res.status === 200) {
-        console.log(1);
+        setLoginErrorMessage("");
         auth.login(email);
         navigate("/calendar");
       }
     } catch (err) {
-      console.log(err);
+      console.error(err);
+      setLoginErrorMessage("Email ou senha incorretos.");
+    }
+  };
+
+  const handleErrors = () => {
+    if (!email) {
+      setEmailValidated("Email deve ser preenchido");
+    } else if (!validateEmail(email)) {
+      setEmailValidated("Email deve possuir um formato válido");
+    } else {
+      setEmailValidated("");
+    }
+    if (!password) {
+      setpasswordValidated("Senha deve ser preenchida.");
+    } else {
+      setpasswordValidated("");
     }
   };
 
   const handleLogin = (event) => {
     event.preventDefault();
-    if (!email || !password || password.length < 8 || !validateEmail(email)) {
+    handleErrors();
+    if (!email || !password || !validateEmail(email)) {
       return;
     }
     console.log("Foi");
@@ -66,7 +87,11 @@ const ModalLogin = (props) => {
                   type="email"
                   placeholder="Digite seu e-mail"
                   onChange={handleChangeEmail}
+                  isInvalid={emailValidated ? true : false}
                 />
+                {emailValidated && (
+                  <Form.Text className="text-muted">{emailValidated}</Form.Text>
+                )}
               </Form.Group>
               <Form.Group className="mb-3" controlId="formBasicPassword">
                 <Form.Label>Senha</Form.Label>
@@ -74,7 +99,13 @@ const ModalLogin = (props) => {
                   type="password"
                   placeholder="Digite sua senha"
                   onChange={handleChangePassword}
+                  isInvalid={passwordValidated ? true : false}
                 />
+                {passwordValidated && (
+                  <Form.Text className="text-muted">
+                    {passwordValidated}
+                  </Form.Text>
+                )}
               </Form.Group>
               <div
                 className={`${styles.mLink} mb-2`}
@@ -90,6 +121,11 @@ const ModalLogin = (props) => {
               >
                 Entrar
               </Button>
+              {loginErrorMessage && (
+                <Form.Text style={{ color: "red" }}>
+                  {loginErrorMessage}
+                </Form.Text>
+              )}
             </Form>
           </div>
         </Col>
