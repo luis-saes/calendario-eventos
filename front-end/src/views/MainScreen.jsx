@@ -30,6 +30,8 @@ const MainScreen = () => {
   const [editingOrCreating, setEditingOrCreating] = useState();
   const [editingId, setEditingId] = useState();
 
+  const [myEventsList, setMyEventsList] = useState([]);
+
   const renameKey = (object, oldKey, newKey) => {
     object[newKey] = object[oldKey];
     delete object[oldKey];
@@ -52,7 +54,7 @@ const MainScreen = () => {
 
       setMyEventsList(resJson);
     });
-  }, []);
+  }, [myEventsList]);
 
   const postEvent = async (object) => {
     try {
@@ -92,7 +94,7 @@ const MainScreen = () => {
     const currentElement = myEventsList.filter(
       (el) => el.id === eventInfo.id
     )[0];
-
+    console.log(eventInfo, currentElement);
     if (
       currentElement.start.toISOString().split("T")[0] !==
       currentElement.end.toISOString().split("T")[0]
@@ -152,10 +154,9 @@ const MainScreen = () => {
   const onSelectEvent = (eventInfo) => {
     setEditingOrCreating("editing");
     setData(eventInfo);
+    console.log(eventInfo);
     handleShowModal();
   };
-
-  const [myEventsList, setMyEventsList] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
   const handleCloseModal = () => setShowModal(false);
