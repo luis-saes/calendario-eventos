@@ -44,9 +44,8 @@ const update = async (req, res) => {
       error: errorDescription,
     });
   }
-  let o_id = new ObjectId(req.params.id);
   const event = await Events.updateOne(
-    { _id: o_id },
+    { _id: req.params.id },
     {
       descricao,
       data_inicio,
@@ -57,8 +56,7 @@ const update = async (req, res) => {
 };
 
 const remove = async (req, res) => {
-  let o_id = new ObjectId(req.params.id);
-  const event = await Events.deleteOne({ _id: o_id });
+  const event = await Events.deleteOne({ _id: req.params.id });
   return res.json(event);
 };
 
