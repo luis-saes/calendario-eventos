@@ -17,12 +17,16 @@ const MainScreen = () => {
   const [description, setDescription] = useState("");
   const handleChangeDescription = ({ target: { value } }) =>
     setDescription(value);
-  const [day, setDay] = useState();
-  const handleChangeDay = ({ target: { value } }) => setDay(value);
+  const [startDay, setStartDay] = useState();
+  const handleChangeStartDay = ({ target: { value } }) => setStartDay(value);
+  const [endDay, setEndDay] = useState();
+  const handleChangeEndDay = ({ target: { value } }) => setEndDay(value);
   const [startTime, setStartTime] = useState();
   const handleChangeStartTime = ({ target: { value } }) => setStartTime(value);
   const [endTime, setEndTime] = useState();
   const handleChangeEndTime = ({ target: { value } }) => setEndTime(value);
+  const [checked, setChecked] = useState(false);
+  const handleChangeCheckbox = () => setChecked(!checked);
   const [editingOrCreating, setEditingOrCreating] = useState();
   const [editingId, setEditingId] = useState();
 
@@ -58,7 +62,7 @@ const MainScreen = () => {
         data_fim: object.end,
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -70,7 +74,7 @@ const MainScreen = () => {
         data_fim: object.end,
       });
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -78,7 +82,7 @@ const MainScreen = () => {
     try {
       await axios.delete(`http://localhost:3001/calendar/${id}`);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -89,14 +93,24 @@ const MainScreen = () => {
       (el) => el.id === eventInfo.id
     )[0];
 
+    if (
+      currentElement.start.toISOString().split("T")[0] !==
+      currentElement.end.toISOString().split("T")[0]
+    ) {
+      setChecked(true);
+      setEndDay(currentElement.end.toISOString().split("T")[0]);
+    } else {
+      setChecked(false);
+    }
     setCurrentId(currentElement.id);
     setDescription(currentElement.title);
-    setDay(currentElement.start.toISOString().split("T")[0]);
+    setStartDay(currentElement.start.toISOString().split("T")[0]);
     setStartTime(
       `${padTo2Digits(currentElement.start.getHours())}:${padTo2Digits(
         currentElement.start.getMinutes()
       )}`
     );
+    setEndDay(currentElement.end.toISOString().split("T")[0]);
     setEndTime(
       `${padTo2Digits(currentElement.end.getHours())}:${padTo2Digits(
         currentElement.end.getMinutes()
@@ -108,8 +122,8 @@ const MainScreen = () => {
 
   const handleDeleteEvent = () => {
     setMyEventsList(myEventsList.filter((el) => el.id !== currentId));
-    handleCloseModal();
     deleteEvent(currentId);
+    handleCloseModal();
   };
 
   const padTo2Digits = (num) => {
@@ -117,10 +131,11 @@ const MainScreen = () => {
   };
 
   const onSelectSlot = (slotInfo) => {
+    setChecked(false);
     setEditingOrCreating("creating");
     setModalTitle("Adicionar Novo Evento");
     setDescription("");
-    setDay(slotInfo.start.toISOString().split("T")[0]);
+    setStartDay(slotInfo.start.toISOString().split("T")[0]);
     setStartTime(
       `${padTo2Digits(slotInfo.start.getHours())}:${padTo2Digits(
         slotInfo.start.getMinutes()
@@ -148,9 +163,12 @@ const MainScreen = () => {
   const handleConfirmModal = () => {
     const eventObject = {
       title: description,
-      start: new Date(`${day}T${startTime}`),
-      end: new Date(`${day}T${endTime}`),
+      start: new Date(`${startDay}T${startTime}`),
+      end: new Date(`${endDay}T${endTime}`),
     };
+    if (!checked) {
+      eventObject.end = new Date(`${startDay}T${startTime}`);
+    }
     if (editingOrCreating === "creating") {
       setMyEventsList([...myEventsList, eventObject]);
       postEvent(eventObject);
@@ -189,14 +207,33 @@ const MainScreen = () => {
                 autoFocus
               />
             </Form.Group>
-            <Form.Group className="mb-3" controlId="date1">
-              <Form.Label>Dia</Form.Label>
+            <Form.Group controlId="date1">
+              <Form.Label>Dia de início</Form.Label>
               <Form.Control
                 type="date"
-                value={day}
-                onChange={handleChangeDay}
+                value={startDay}
+                onChange={handleChangeStartDay}
               />
             </Form.Group>
+            <Form.Group controlId="checkbox1">
+              <Form.Check
+                type="checkbox"
+                id="default-checkbox"
+                label="Dia de fim possui outra data"
+                onChange={handleChangeCheckbox}
+                checked={checked}
+              />
+            </Form.Group>
+            {checked && (
+              <Form.Group controlId="date1">
+                <Form.Label>Dia de fim</Form.Label>
+                <Form.Control
+                  type="date"
+                  value={endDay}
+                  onChange={handleChangeEndDay}
+                />
+              </Form.Group>
+            )}
             <Form.Group className="mb-3" controlId="time1">
               <Form.Label>Hora de início</Form.Label>
               <Form.Control
@@ -241,7 +278,7 @@ const MainScreen = () => {
             allDay: "Dia Todo",
             week: "Semana",
             work_week: "Semana de Trabalho",
-            day: "Dia",
+            startDay: "Dia",
             month: "Mês",
             previous: "Anterior",
             next: "Próximo",

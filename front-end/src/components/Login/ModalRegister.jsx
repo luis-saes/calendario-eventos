@@ -37,7 +37,7 @@ const ModalRegister = (props) => {
       });
       handleShow();
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -62,7 +62,6 @@ const ModalRegister = (props) => {
     if (!email || !password || password.length < 8 || !validateEmail(email)) {
       return;
     }
-    console.log("Foi");
     postUser();
   };
 

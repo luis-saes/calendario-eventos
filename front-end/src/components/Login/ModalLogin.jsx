@@ -70,7 +70,6 @@ const ModalLogin = (props) => {
     if (!email || !password || !validateEmail(email)) {
       return;
     }
-    console.log("Foi");
     getOneLogin();
   };
 
