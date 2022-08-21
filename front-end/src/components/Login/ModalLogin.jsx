@@ -32,12 +32,15 @@ const ModalLogin = (props) => {
 
   const getOneLogin = async () => {
     try {
-      const res = await axios.get("http://localhost:3001/", {
-        params: {
-          email,
-          password,
-        },
-      });
+      const res = await axios.get(
+        "https://calendario-nuvem-back.herokuapp.com/",
+        {
+          params: {
+            email,
+            password,
+          },
+        }
+      );
       if (res.status === 200) {
         setLoginErrorMessage("");
         auth.login(email);

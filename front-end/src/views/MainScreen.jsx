@@ -42,23 +42,25 @@ const MainScreen = () => {
   };
 
   useEffect(() => {
-    axios.get("http://localhost:3001/calendar").then((res) => {
-      const resJson = res.data;
-      resJson.forEach((object) => renameKey(object, "_id", "id"));
-      resJson.forEach((object) => renameKey(object, "descricao", "title"));
-      resJson.forEach((object) => renameKey(object, "data_inicio", "start"));
-      resJson.forEach((object) => renameKey(object, "data_fim", "end"));
+    axios
+      .get("https://calendario-nuvem-back.herokuapp.com/calendar")
+      .then((res) => {
+        const resJson = res.data;
+        resJson.forEach((object) => renameKey(object, "_id", "id"));
+        resJson.forEach((object) => renameKey(object, "descricao", "title"));
+        resJson.forEach((object) => renameKey(object, "data_inicio", "start"));
+        resJson.forEach((object) => renameKey(object, "data_fim", "end"));
 
-      resJson.forEach((object) => convertToTime(object, "start"));
-      resJson.forEach((object) => convertToTime(object, "end"));
+        resJson.forEach((object) => convertToTime(object, "start"));
+        resJson.forEach((object) => convertToTime(object, "end"));
 
-      setMyEventsList(resJson);
-    });
+        setMyEventsList(resJson);
+      });
   }, [myEventsList]);
 
   const postEvent = async (object) => {
     try {
-      await axios.post("http://localhost:3001/calendar", {
+      await axios.post("https://calendario-nuvem-back.herokuapp.com/calendar", {
         descricao: object.title,
         data_inicio: object.start,
         data_fim: object.end,
@@ -70,11 +72,14 @@ const MainScreen = () => {
 
   const putEvent = async (object) => {
     try {
-      await axios.put(`http://localhost:3001/calendar/${object.id}`, {
-        descricao: object.title,
-        data_inicio: object.start,
-        data_fim: object.end,
-      });
+      await axios.put(
+        `https://calendario-nuvem-back.herokuapp.com/calendar/${object.id}`,
+        {
+          descricao: object.title,
+          data_inicio: object.start,
+          data_fim: object.end,
+        }
+      );
     } catch (error) {
       console.error(error);
     }
@@ -82,7 +87,9 @@ const MainScreen = () => {
 
   const deleteEvent = async (id) => {
     try {
-      await axios.delete(`http://localhost:3001/calendar/${id}`);
+      await axios.delete(
+        `https://calendario-nuvem-back.herokuapp.com/calendar/${id}`
+      );
     } catch (error) {
       console.error(error);
     }

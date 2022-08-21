@@ -31,7 +31,7 @@ const ModalRegister = (props) => {
 
   const postUser = async () => {
     try {
-      await axios.post("http://localhost:3001/", {
+      await axios.post("https://calendario-nuvem-back.herokuapp.com/", {
         login: email,
         senha: password,
       });
